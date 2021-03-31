@@ -156,17 +156,28 @@ void ChessWidget::paint_event(GUI::PaintEvent& event)
 
     if (m_dragging_piece) {
         if (m_show_available_moves) {
-            Gfx::IntPoint move_point;
+            Gfx::IntPoint top_left_corner;
             Gfx::IntPoint point_offset = { tile_width / 3, tile_height / 3 };
             Gfx::IntSize rect_size = { tile_width / 3, tile_height / 3 };
             for (const auto& square : m_available_moves) {
                 if (side() == Chess::Color::White) {
-                    move_point = { square.file * tile_width, (7 - square.rank) * tile_height };
+                    top_left_corner = { square.file * tile_width, (7 - square.rank) * tile_height };
                 } else {
-                    move_point = { (7 - square.file) * tile_width, square.rank * tile_height };
+                    top_left_corner = { (7 - square.file) * tile_width, square.rank * tile_height };
                 }
 
-                painter.fill_ellipse({ move_point + point_offset, rect_size }, Gfx::Color::LightGray);
+                auto piece_on_square = m_board.get_piece(square);
+                if (piece_on_square == Chess::EmptyPiece) {
+                    painter.fill_ellipse({ top_left_corner + point_offset, rect_size }, Gfx::Color::LightGray);
+                } else {
+                    auto triangle_width = tile_width / 5;
+                    auto triangle_height = tile_height / 5;
+
+                    painter.draw_triangle(top_left_corner, top_left_corner.translated(0, triangle_height), top_left_corner.translated(triangle_width, 0), Gfx::Color::LightGray);                                                                                // Top left
+                    painter.draw_triangle(top_left_corner.translated(tile_width, 0), top_left_corner.translated(tile_width, triangle_height), top_left_corner.translated(tile_width - triangle_height, 0), Gfx::Color::LightGray);                               // Top right
+                    painter.draw_triangle(top_left_corner.translated(0, tile_width), top_left_corner.translated(triangle_width, tile_width), top_left_corner.translated(0, tile_width - triangle_height), Gfx::Color::LightGray);                                // Bottom left
+                    painter.draw_triangle(top_left_corner.translated(tile_width, tile_width), top_left_corner.translated(tile_width - triangle_width, tile_width), top_left_corner.translated(tile_width, tile_width - triangle_height), Gfx::Color::LightGray); // Bottom right
+                }
             }
         }
 
