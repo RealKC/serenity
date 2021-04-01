@@ -25,6 +25,7 @@
  */
 
 #include "ChessWidget.h"
+#include "LibGfx/Forward.h"
 #include "PromotionDialog.h"
 #include <AK/String.h>
 #include <LibCore/DateTime.h>
@@ -95,6 +96,13 @@ void ChessWidget::paint_event(GUI::PaintEvent& event)
                 Gfx::Color color = m.secondary_color ? m_marking_secondary_color : (m.alternate_color ? m_marking_alternate_color : m_marking_primary_color);
                 painter.fill_rect(tile_rect, color);
             }
+        }
+
+        //Highlight kings in check
+        bool is_current_square_king = (active_board.get_piece(sq).type == Chess::Type::King);
+        if (is_current_square_king && active_board.in_check(active_board.get_piece(sq).color)) {
+            painter.fill_ellipse(tile_rect, Color(255, 77, 77));
+            painter.fill_ellipse({ (tile_rect.center() + tile_rect.top_left()) / 2, Gfx::IntSize(tile_rect.width() / 2, tile_rect.height() / 2) }, Color::Red);
         }
 
         if (!(m_dragging_piece && sq == m_moving_square)) {
